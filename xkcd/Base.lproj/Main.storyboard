@@ -87,7 +87,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="bRt-c5-9uu">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <rect key="frame" x="0.0" y="64" width="600" height="536"/>
                                 <animations/>
                             </imageView>
                         </subviews>
@@ -95,9 +95,9 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="bRt-c5-9uu" secondAttribute="trailing" id="3x2-NJ-iR0"/>
-                            <constraint firstItem="bRt-c5-9uu" firstAttribute="top" secondItem="MMQ-IT-qOo" secondAttribute="top" id="5Cl-yX-i8g"/>
                             <constraint firstAttribute="bottom" secondItem="bRt-c5-9uu" secondAttribute="bottom" id="Fg6-mf-7Nw"/>
                             <constraint firstItem="bRt-c5-9uu" firstAttribute="leading" secondItem="MMQ-IT-qOo" secondAttribute="leading" id="KZK-K2-oii"/>
+                            <constraint firstItem="bRt-c5-9uu" firstAttribute="top" secondItem="cIm-e0-J51" secondAttribute="bottom" id="bM3-Lx-PBV"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Detail" id="cra-N8-TIN"/>
