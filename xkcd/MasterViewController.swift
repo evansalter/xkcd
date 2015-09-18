@@ -28,8 +28,6 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         while(xmlParser == nil) {
         }
         
-        
-        
     }
 
     override func didReceiveMemoryWarning() {

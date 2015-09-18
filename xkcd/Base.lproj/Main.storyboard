@@ -90,7 +90,7 @@
                                 <rect key="frame" x="0.0" y="64" width="600" height="492"/>
                                 <animations/>
                             </imageView>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Vag-nF-GAX">
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Vag-nF-GAX">
                                 <rect key="frame" x="0.0" y="556" width="600" height="44"/>
                                 <animations/>
                                 <constraints>
@@ -103,6 +103,19 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="zUw-fI-Ep3"/>
+                                    <barButtonItem style="plain" id="TV8-Ef-q1P">
+                                        <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="V6F-cT-7bq">
+                                            <rect key="frame" x="538" y="7" width="30" height="30"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <animations/>
+                                            <state key="normal" title="Info">
+                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="infoButtonPressed:" destination="Ah7-4n-0Wa" eventType="touchUpInside" id="6bC-d2-ehu"/>
+                                            </connections>
+                                        </button>
+                                    </barButtonItem>
                                 </items>
                             </toolbar>
                         </subviews>
@@ -114,6 +127,8 @@
                             <constraint firstItem="Vag-nF-GAX" firstAttribute="top" secondItem="bRt-c5-9uu" secondAttribute="bottom" id="LhF-Yq-7di"/>
                             <constraint firstAttribute="bottom" secondItem="Vag-nF-GAX" secondAttribute="bottom" id="ZdE-wX-mC0"/>
                             <constraint firstItem="bRt-c5-9uu" firstAttribute="top" secondItem="cIm-e0-J51" secondAttribute="bottom" id="bM3-Lx-PBV"/>
+                            <constraint firstItem="Vag-nF-GAX" firstAttribute="leading" secondItem="MMQ-IT-qOo" secondAttribute="leading" id="iAq-vL-n15"/>
+                            <constraint firstAttribute="trailing" secondItem="Vag-nF-GAX" secondAttribute="trailing" id="mcq-Rm-24Y"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Detail" id="cra-N8-TIN"/>

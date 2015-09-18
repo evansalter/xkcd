@@ -69,6 +69,28 @@ class DetailViewController: UIViewController {
         
     }
     
+    @IBAction func infoButtonPressed(sender: AnyObject) {
+        
+        print("info clicked")
+        
+        let url = detailItem?.link
+        
+        let message = "This image use used under CC BY-NC 2.5 and is taken from " + url!
+        
+        let alertView = UIAlertController(title: "Attribution", message: message, preferredStyle: UIAlertControllerStyle.Alert)
+        
+        let OKAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+        let URLAction = UIAlertAction(title: "Visit Website", style: UIAlertActionStyle.Default) { value in
+            UIApplication.sharedApplication().openURL(NSURL(string: url!)!)
+        }
+        
+        alertView.addAction(OKAction)
+        alertView.addAction(URLAction)
+        
+        self.presentViewController(alertView, animated: true, completion: nil)
+        
+    }
+    
     @IBAction func shareButtonPressed(sender: AnyObject) {
         
         let websiteToShare = NSURL(string: detailItem!.link)
