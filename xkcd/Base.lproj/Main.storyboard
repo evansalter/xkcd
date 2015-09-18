@@ -97,7 +97,11 @@
                                     <constraint firstAttribute="height" constant="44" id="C2N-l1-RIG"/>
                                 </constraints>
                                 <items>
-                                    <barButtonItem systemItem="action" id="wA0-Rm-r2o"/>
+                                    <barButtonItem systemItem="action" id="wA0-Rm-r2o">
+                                        <connections>
+                                            <action selector="shareButtonPressed:" destination="Ah7-4n-0Wa" id="pDo-yF-lyY"/>
+                                        </connections>
+                                    </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="zUw-fI-Ep3"/>
                                 </items>
                             </toolbar>

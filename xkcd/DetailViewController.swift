@@ -68,6 +68,26 @@ class DetailViewController: UIViewController {
         self.presentViewController(alertView, animated: true, completion: nil)
         
     }
+    
+    @IBAction func shareButtonPressed(sender: AnyObject) {
+        
+        let websiteToShare = NSURL(string: detailItem!.link)
+        let imageToShare:UIImage = imgView.image!
+        let title = detailItem?.title
+        let alt = detailItem?.alt
+        let textToShare = "\"" + title! + "\".  Alt-text: " + alt!
+        
+        var objectsToShare = [AnyObject]()
+        
+        objectsToShare.append(imageToShare)
+        objectsToShare.append(textToShare)
+        objectsToShare.append(websiteToShare!)
+        
+        let shareSheet = UIActivityViewController(activityItems:objectsToShare, applicationActivities: nil)
+        
+        self.presentViewController(shareSheet, animated: true, completion: nil)
+        
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
