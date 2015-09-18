@@ -68,7 +68,16 @@
                             <outlet property="delegate" destination="pGg-6v-bdr" id="Y6K-Cp-Qkv"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="xkcd" id="tQt-TN-PWz"/>
+                    <navigationItem key="navigationItem" title="xkcd" id="tQt-TN-PWz">
+                        <barButtonItem key="rightBarButtonItem" style="plain" systemItem="search" id="lEQ-4V-QKG">
+                            <connections>
+                                <action selector="searchButtonPressed:" destination="pGg-6v-bdr" id="pBL-Ei-hyT"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <segue destination="Ah7-4n-0Wa" kind="show" identifier="showDetailManual" id="TMZ-q2-MK2"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6Cn-md-YlS" sceneMemberID="firstResponder"/>
             </objects>
@@ -104,11 +113,11 @@
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="zUw-fI-Ep3"/>
                                     <barButtonItem style="plain" id="TV8-Ef-q1P">
-                                        <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="V6F-cT-7bq">
-                                            <rect key="frame" x="538" y="7" width="30" height="30"/>
+                                        <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="infoLight" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" id="V6F-cT-7bq">
+                                            <rect key="frame" x="554" y="7" width="22" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <animations/>
-                                            <state key="normal" title="Info">
+                                            <state key="normal">
                                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                             </state>
                                             <connections>
@@ -155,4 +164,7 @@
             <point key="canvasLocation" x="1343" y="64"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="TMZ-q2-MK2"/>
+    </inferredMetricsTieBreakers>
 </document>

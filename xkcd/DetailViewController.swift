@@ -27,11 +27,12 @@ class DetailViewController: UIViewController {
         let url = NSURL(string: detail.imageLink)
         let imageRequest: NSURLRequest = NSURLRequest(URL: url!)
         let queue: NSOperationQueue = NSOperationQueue.mainQueue()
+        
         NSURLConnection.sendAsynchronousRequest(imageRequest, queue: queue, completionHandler: {_, imgData, _ in
             
-                self.loadingLabel.hidden = true
+                self.loadingLabel?.hidden = true
                 let image = UIImage(data: imgData)
-                self.imgView.image = image
+                self.imgView?.image = image
                     
             }
         )

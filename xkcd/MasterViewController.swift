@@ -18,6 +18,8 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     
     // XML parser object to parse RSS feed
     var xmlParser: NSXMLParser!
+    
+    var searchComic: Comic = Comic()
 
 
     // ******************
@@ -31,9 +33,25 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        var refreshControl = UIRefreshControl()
+        
+        self.refreshControl?.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        self.refreshControl?.addTarget(self, action: "refresh:", forControlEvents: UIControlEvents.ValueChanged)
+        self.tableView.addSubview(refreshControl)
+        
         startLoading()
         
         // parse RSS
+        getRSS()
+        
+    }
+    
+    func refresh(sender: AnyObject) {
+        
+        self.objects.removeAll(keepCapacity: true)
+
+        self.refreshControl?.endRefreshing()
+        self.startLoading()
         getRSS()
         
     }
@@ -47,6 +65,95 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         objects.insert(NSDate(), atIndex: 0)
         let indexPath = NSIndexPath(forRow: 0, inSection: 0)
         self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+    }
+    
+    @IBAction func searchButtonPressed(sender: AnyObject) {
+        
+        let alertController = UIAlertController(title: "Find Comic", message: "Enter the number of the comic to open:", preferredStyle: .Alert)
+        
+        let submitAction = UIAlertAction(title: "Submit", style: .Default) { (_) in
+            
+            let comicField = alertController.textFields![0] as! UITextField
+            
+            self.searchForComicByNumber(comicField.text)
+            
+        }
+        
+        submitAction.enabled = false
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (_) in }
+        
+        alertController.addTextFieldWithConfigurationHandler { (textField) in
+            
+            textField.placeholder = "Comic number"
+            
+            NSNotificationCenter.defaultCenter().addObserverForName(UITextFieldTextDidChangeNotification, object: textField, queue: NSOperationQueue.mainQueue()) { (notification) in
+                submitAction.enabled = textField.text != ""
+            }
+            
+        }
+        
+        alertController.addAction(submitAction)
+        alertController.addAction(cancelAction)
+        
+        self.presentViewController(alertController, animated: true, completion: nil)
+        
+    }
+    
+    func searchForComicByNumber(string: String) {
+        
+        let urlString = NSURL(string: "http://xkcd.com/" + string)
+        let urlRequest = NSURLRequest(URL: urlString!)
+        let queue = NSOperationQueue()
+        
+        NSURLConnection.sendAsynchronousRequest(urlRequest, queue: queue) {
+            (response, data, error) -> Void in
+            let stringData = NSString(data: data, encoding: NSUTF8StringEncoding)
+
+            if(stringData!.length < 400){
+                self.invalidNumberError(string)
+            }
+            else {
+                let comic = Comic()
+                comic.link = urlString!.description
+                comic.number = string
+                let arrayOfImgSrc:[NSString] = stringData?.componentsSeparatedByString("<img src=\"//") as! [NSString]
+                let comicInfo = arrayOfImgSrc[2]
+                let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
+                comic.imageLink = "http://" + (arrayOfComicInfo[0] as! String)
+                comic.title = arrayOfComicInfo[4] as! String
+                comic.alt = arrayOfComicInfo[2] as! String
+                comic.description = ""
+                comic.date = ""
+                
+                self.searchComic = comic
+            
+                let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+                dispatch_async(dispatch_get_global_queue(priority, 0)) {
+                    
+                    dispatch_async(dispatch_get_main_queue()) {
+                        
+                        self.performSegueWithIdentifier("showDetailManual", sender: self)
+                        
+                    }
+                    
+                }
+                
+            }
+            
+        }
+        
+    }
+    
+    func invalidNumberError(num: String) {
+        
+        let alertView = UIAlertController(title: "Invalid Comic Number", message: "Comic " + num + " does not exist.", preferredStyle: .Alert)
+        let OKAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+        
+        alertView.addAction(OKAction)
+        
+        self.presentViewController(alertView, animated: true, completion: nil)
+        
     }
     
     /**
@@ -193,6 +300,9 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                 let object = objects[indexPath.row] as! Comic
             (segue.destinationViewController as! DetailViewController).detailItem = object
             }
+        }
+        else if segue.identifier == "showDetailManual" {
+            (segue.destinationViewController as! DetailViewController).detailItem = searchComic
         }
     }
 
