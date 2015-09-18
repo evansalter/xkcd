@@ -40,7 +40,32 @@ class DetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        var gestureRecognizer = UILongPressGestureRecognizer(target: self, action: "imageLongPressed:")
+        imgView.addGestureRecognizer(gestureRecognizer)
+        
         self.configureView()
+        
+    }
+    
+    func imageLongPressed(img: AnyObject) {
+        showAltText()
+    }
+    
+    func showAltText() {
+        
+        let encodedData = detailItem?.alt.dataUsingEncoding(NSUTF8StringEncoding)!
+        let attributedOptions : [String: AnyObject] = [
+            NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
+            NSCharacterEncodingDocumentAttribute: NSUTF8StringEncoding
+        ]
+        let attributedString = NSAttributedString(data: encodedData!, options: attributedOptions, documentAttributes: nil, error: nil)
+        let decodedString = attributedString!.string
+        
+        let alertView = UIAlertController(title: nil, message: decodedString, preferredStyle: UIAlertControllerStyle.Alert)
+        alertView.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+        
+        self.presentViewController(alertView, animated: true, completion: nil)
         
     }
 
