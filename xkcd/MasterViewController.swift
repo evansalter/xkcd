@@ -25,8 +25,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
         getRSS()
         
-        while(xmlParser == nil) {
-        }
+        self.tableView.reloadData()
         
     }
 

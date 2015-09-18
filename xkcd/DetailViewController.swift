@@ -54,28 +54,34 @@ class DetailViewController: UIViewController {
     
     func showAltText() {
         
-        let encodedData = detailItem?.alt.dataUsingEncoding(NSUTF8StringEncoding)!
-        let attributedOptions : [String: AnyObject] = [
-            NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
-            NSCharacterEncodingDocumentAttribute: NSUTF8StringEncoding
-        ]
-        let attributedString = NSAttributedString(data: encodedData!, options: attributedOptions, documentAttributes: nil, error: nil)
-        let decodedString = attributedString!.string
+        let string = decodeString(detailItem!.alt)
         
-        let alertView = UIAlertController(title: nil, message: decodedString, preferredStyle: UIAlertControllerStyle.Alert)
+        let alertView = UIAlertController(title: nil, message: string, preferredStyle: UIAlertControllerStyle.Alert)
         alertView.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
         
         self.presentViewController(alertView, animated: true, completion: nil)
         
     }
     
+    func decodeString(string: String) -> String {
+        
+        let encodedData = string.dataUsingEncoding(NSUTF8StringEncoding)!
+        let attributedOptions : [String: AnyObject] = [
+            NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
+            NSCharacterEncodingDocumentAttribute: NSUTF8StringEncoding
+        ]
+        let attributedString = NSAttributedString(data: encodedData, options: attributedOptions, documentAttributes: nil, error: nil)
+        let decodedString = attributedString!.string
+        
+        return decodedString
+        
+    }
+    
     @IBAction func infoButtonPressed(sender: AnyObject) {
-        
-        print("info clicked")
-        
+                
         let url = detailItem?.link
         
-        let message = "This image use used under CC BY-NC 2.5 and is taken from " + url!
+        let message = "This image is used under CC BY-NC 2.5 and is taken from " + url!
         
         let alertView = UIAlertController(title: "Attribution", message: message, preferredStyle: UIAlertControllerStyle.Alert)
         
@@ -96,8 +102,8 @@ class DetailViewController: UIViewController {
         let websiteToShare = NSURL(string: detailItem!.link)
         let imageToShare:UIImage = imgView.image!
         let title = detailItem?.title
-        let alt = detailItem?.alt
-        let textToShare = "\"" + title! + "\".  Alt-text: " + alt!
+        let alt = decodeString(detailItem!.alt)
+        let textToShare = "\"" + title! + "\".  Alt-text: " + alt
         
         var objectsToShare = [AnyObject]()
         
