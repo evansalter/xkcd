@@ -201,6 +201,10 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1
     }
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        self.tableView.cellForRowAtIndexPath(indexPath)?.selected = false
+    }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return objects.count

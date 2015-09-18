@@ -11,6 +11,7 @@ import UIKit
 class DetailViewController: UIViewController {
 
     @IBOutlet weak var imgView: UIImageView!
+    @IBOutlet weak var loadingLabel: UILabel!
     
     var detailItem: Comic? {
         didSet {
@@ -21,15 +22,19 @@ class DetailViewController: UIViewController {
 
     func configureView() {
         // Update the user interface for the detail item.
-        if let detail: Comic = self.detailItem {
-            if let url = NSURL(string: detail.imageLink) {
-                if let data = NSData(contentsOfURL: url) {
-                    if let image = UIImage(data: data) {
-                        imgView?.image = image
-                    }
-                }
+        
+        let detail: Comic = self.detailItem!
+        let url = NSURL(string: detail.imageLink)
+        let imageRequest: NSURLRequest = NSURLRequest(URL: url!)
+        let queue: NSOperationQueue = NSOperationQueue.mainQueue()
+        NSURLConnection.sendAsynchronousRequest(imageRequest, queue: queue, completionHandler: {_, imgData, _ in
+            
+                self.loadingLabel.hidden = true
+                let image = UIImage(data: imgData)
+                self.imgView.image = image
+                    
             }
-        }
+        )
         
         imgView?.contentMode = UIViewContentMode.ScaleAspectFit
         
