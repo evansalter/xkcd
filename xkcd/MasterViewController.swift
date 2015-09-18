@@ -9,12 +9,20 @@
 import UIKit
 
 class MasterViewController: UITableViewController, NSXMLParserDelegate {
-
+    
+    // **************************
+    // MARK: - Instance Variables
+    // **************************
+    
     var objects = [AnyObject]()
     
+    // XML parser object to parse RSS feed
     var xmlParser: NSXMLParser!
 
 
+    // ******************
+    // MARK: - View Setup
+    // ******************
     override func awakeFromNib() {
         super.awakeFromNib()
     }
@@ -23,9 +31,10 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        getRSS()
+        startLoading()
         
-        self.tableView.reloadData()
+        // parse RSS
+        getRSS()
         
     }
 
@@ -40,7 +49,12 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
     }
     
+    /**
+        getRSS()
+        Downloads the RSS feed in XML form and calls the parser
+    */
     func getRSS() {
+        
         let urlString = NSURL(string: "http://xkcd.com/rss.xml")
         let rssUrlRequest:NSURLRequest = NSURLRequest(URL: urlString!)
         let queue:NSOperationQueue = NSOperationQueue()
@@ -51,9 +65,26 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             self.xmlParser.delegate = self
             self.xmlParser.parse()
         }
+        
     }
     
+    func startLoading() {
+        
+        let alertView = UIAlertController(title: "Loading...", message: nil, preferredStyle: UIAlertControllerStyle.Alert)
+        
+        self.presentViewController(alertView, animated: true, completion: nil)
+        
+    }
+    
+    func stopLoading() {
+        
+        self.dismissViewControllerAnimated(true, completion: nil)
+        
+    }
+    
+    // *****************
     // MARK: - XMLParser
+    // *****************
     
     var entryTitle: String!
     var entryLink: String!
@@ -136,7 +167,22 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     }
     
     func parserDidEndDocument(parser: NSXMLParser) {
-        self.tableView.reloadData()
+        
+        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+        dispatch_async(dispatch_get_global_queue(priority, 0)) {
+            
+            dispatch_async(dispatch_get_main_queue()) {
+                
+                self.tableView.reloadData()
+                
+                self.stopLoading()
+                
+            }
+            
+        }
+        
+        
+//        self.tableView.reloadData()
     }
 
     // MARK: - Segues
