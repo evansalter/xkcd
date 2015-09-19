@@ -16,4 +16,4 @@ A simple iOS app for viewing the latest XKCD comics.  Currently a work in progre
 
 ![Screenshot 6](/Screenshots/6.png?raw=true "Attribution")
 
-![Screenshot 4](/Screenshots/4.png?raw=true "Share")
+![Screenshot 7](/Screenshots/7.png?raw=true "Share")
