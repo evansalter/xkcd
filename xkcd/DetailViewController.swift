@@ -28,10 +28,10 @@ class DetailViewController: UIViewController {
         let imageRequest: NSURLRequest = NSURLRequest(URL: url!)
         let queue: NSOperationQueue = NSOperationQueue.mainQueue()
         
-        NSURLConnection.sendAsynchronousRequest(imageRequest, queue: queue, completionHandler: {_, imgData, _ in
+        NSURLConnection.sendAsynchronousRequest(imageRequest, queue: queue, completionHandler: {response, imgData, error in
             
                 self.loadingLabel?.hidden = true
-                let image = UIImage(data: imgData)
+                let image = UIImage(data: imgData!)
                 self.imgView?.image = image
                     
             }
@@ -47,7 +47,7 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        var gestureRecognizer = UILongPressGestureRecognizer(target: self, action: "imageLongPressed:")
+        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: "imageLongPressed:")
         imgView.addGestureRecognizer(gestureRecognizer)
         
         self.configureView()
@@ -76,7 +76,7 @@ class DetailViewController: UIViewController {
             NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
             NSCharacterEncodingDocumentAttribute: NSUTF8StringEncoding
         ]
-        let attributedString = NSAttributedString(data: encodedData, options: attributedOptions, documentAttributes: nil, error: nil)
+        let attributedString = try? NSAttributedString(data: encodedData, options: attributedOptions, documentAttributes: nil)
         let decodedString = attributedString!.string
         
         return decodedString

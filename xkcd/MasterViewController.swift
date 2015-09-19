@@ -73,9 +73,9 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
         let submitAction = UIAlertAction(title: "Submit", style: .Default) { (_) in
             
-            let comicField = alertController.textFields![0] as! UITextField
+            let comicField = alertController.textFields![0] 
             
-            self.searchForComicByNumber(comicField.text)
+            self.searchForComicByNumber(comicField.text!)
             
         }
         
@@ -108,7 +108,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
         NSURLConnection.sendAsynchronousRequest(urlRequest, queue: queue) {
             (response, data, error) -> Void in
-            let stringData = NSString(data: data, encoding: NSUTF8StringEncoding)
+            let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
 
             if(stringData!.length < 400){
                 self.invalidNumberError(string)
@@ -117,12 +117,12 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                 let comic = Comic()
                 comic.link = urlString!.description
                 comic.number = string
-                let arrayOfImgSrc:[NSString] = stringData?.componentsSeparatedByString("<img src=\"//") as! [NSString]
+                let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
                 let comicInfo = arrayOfImgSrc[2]
                 let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
-                comic.imageLink = "http://" + (arrayOfComicInfo[0] as! String)
-                comic.title = arrayOfComicInfo[4] as! String
-                comic.alt = arrayOfComicInfo[2] as! String
+                comic.imageLink = "http://" + (arrayOfComicInfo[0] )
+                comic.title = arrayOfComicInfo[4] 
+                comic.alt = arrayOfComicInfo[2] 
                 comic.description = ""
                 comic.date = ""
                 
@@ -168,7 +168,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
         NSURLConnection.sendAsynchronousRequest(rssUrlRequest, queue: queue) {
             (response, data, error) -> Void in
-            self.xmlParser = NSXMLParser(data: data)
+            self.xmlParser = NSXMLParser(data: data!)
             self.xmlParser.delegate = self
             self.xmlParser.parse()
         }
@@ -199,7 +199,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
 //            dispatch_async(dispatch_get_main_queue()) {
             
                 let lowestNumberString = (self.objects[self.objects.count-1] as! Comic).number
-                let lowestNumberInt = lowestNumberString.toInt()
+                let lowestNumberInt = Int(lowestNumberString)
                 var nums = [String]()
                 
                 for var i = lowestNumberInt! - 1; i >= lowestNumberInt! - 10; i-- {
@@ -210,18 +210,18 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                     
                     let urlString = NSURL(string: "http://xkcd.com/" + nums[i])
                     let urlRequest = NSURLRequest(URL: urlString!)
-                    var data = NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil, error: nil)
-                    var stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
+                    let data = try? NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil)
+                    let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
                     
                     let comic = Comic()
                     comic.link = urlString!.description
                     comic.number = nums[i]
-                    let arrayOfImgSrc:[NSString] = stringData?.componentsSeparatedByString("<img src=\"//") as! [NSString]
+                    let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
                     let comicInfo = arrayOfImgSrc[2]
                     let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
-                    comic.imageLink = "http://" + (arrayOfComicInfo[0] as! String)
-                    comic.title = arrayOfComicInfo[4] as! String
-                    comic.alt = arrayOfComicInfo[2] as! String
+                    comic.imageLink = "http://" + (arrayOfComicInfo[0] )
+                    comic.title = arrayOfComicInfo[4] 
+                    comic.alt = arrayOfComicInfo[2] 
                     comic.description = ""
                     comic.date = ""
                     
@@ -229,7 +229,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                     
                     let indexPath = NSIndexPath(forRow: self.objects.count-1, inSection: 0)
                     self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
-                    let cell = self.tableView.cellForRowAtIndexPath(indexPath)
+//                    let cell = self.tableView.cellForRowAtIndexPath(indexPath)
                     
 //                    self.tableView.reloadData()
                     
@@ -279,7 +279,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     var currentParsedElement = String()
     var weAreInsideAnItem = false
     
-    func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [NSObject : AnyObject]) {
+    func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
         
         if elementName == "item" {
             weAreInsideAnItem = true
@@ -304,17 +304,17 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
     }
     
-    func parser(parser: NSXMLParser, foundCharacters string: String?) {
+    func parser(parser: NSXMLParser, foundCharacters string: String) {
         if weAreInsideAnItem {
             switch currentParsedElement {
             case "title":
-                self.entryTitle = self.entryTitle + string!
+                self.entryTitle = self.entryTitle + string
             case "link":
-                self.entryLink = self.entryLink + string!
+                self.entryLink = self.entryLink + string
             case "description":
-                self.entryDescription = self.entryDescription + string!
+                self.entryDescription = self.entryDescription + string
             case "pubDate":
-                self.entryDate = self.entryDate + string!
+                self.entryDate = self.entryDate + string
             default: break
             }
         }
@@ -335,7 +335,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             }
         }
         if elementName == "item" {
-            var entryItem = Comic()
+            let entryItem = Comic()
             entryItem.title = entryTitle
             entryItem.link = entryLink
             var linkArr = entryLink.componentsSeparatedByString("/")
@@ -374,7 +374,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "showDetail" {
-            if let indexPath = self.tableView.indexPathForSelectedRow() {
+            if let indexPath = self.tableView.indexPathForSelectedRow {
                 let object = objects[indexPath.row] as! Comic
             (segue.destinationViewController as! DetailViewController).detailItem = object
             }
@@ -409,7 +409,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
-            let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) 
 
             let object = objects[indexPath.row] as! Comic
             cell.textLabel!.text = object.title
@@ -422,7 +422,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             return cell
         }
         else {
-            let cell = tableView.dequeueReusableCellWithIdentifier("Cell2", forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier("Cell2", forIndexPath: indexPath) 
             return cell
         }
     }
