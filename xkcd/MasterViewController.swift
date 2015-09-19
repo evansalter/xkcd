@@ -33,28 +33,12 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-//        var refreshControl = UIRefreshControl()
-//        
-//        self.refreshControl?.attributedTitle = NSAttributedString(string: "Pull to refresh")
-//        self.refreshControl?.addTarget(self, action: "refresh:", forControlEvents: UIControlEvents.ValueChanged)
-//        self.tableView.addSubview(refreshControl)
-        
         startLoading()
         
         // parse RSS
         getRSS()
         
     }
-    
-//    func refresh(sender: AnyObject) {
-//        
-//        self.objects.removeAll(keepCapacity: true)
-//
-//        self.refreshControl?.endRefreshing()
-//        self.startLoading()
-//        getRSS()
-//        
-//    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -195,77 +179,49 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
         let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
         dispatch_async(dispatch_get_global_queue(priority, 0)) {
+        
+            let lowestNumberString = (self.objects[self.objects.count-1] as! Comic).number
+            let lowestNumberInt = Int(lowestNumberString)
+            var nums = [String]()
             
-//            dispatch_async(dispatch_get_main_queue()) {
+            for var i = lowestNumberInt! - 1; i >= lowestNumberInt! - 10; i-- {
+                nums.append(i.description)
+            }
             
-                let lowestNumberString = (self.objects[self.objects.count-1] as! Comic).number
-                let lowestNumberInt = Int(lowestNumberString)
-                var nums = [String]()
+            for var i = 0; i < nums.count; i++ {
                 
-                for var i = lowestNumberInt! - 1; i >= lowestNumberInt! - 10; i-- {
-                    nums.append(i.description)
-                }
+                let urlString = NSURL(string: "http://xkcd.com/" + nums[i])
+                let urlRequest = NSURLRequest(URL: urlString!)
+                let data = try? NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil)
+                let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
                 
-                for var i = 0; i < nums.count; i++ {
-                    
-                    let urlString = NSURL(string: "http://xkcd.com/" + nums[i])
-                    let urlRequest = NSURLRequest(URL: urlString!)
-                    let data = try? NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil)
-                    let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
-                    
-                    let comic = Comic()
-                    comic.link = urlString!.description
-                    comic.number = nums[i]
-                    let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
-                    let comicInfo = arrayOfImgSrc[2]
-                    let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
-                    comic.imageLink = "http://" + (arrayOfComicInfo[0] )
-                    comic.title = arrayOfComicInfo[4] 
-                    comic.alt = arrayOfComicInfo[2] 
-                    comic.description = ""
-                    comic.date = ""
-                    
+                let comic = Comic()
+                comic.link = urlString!.description
+                comic.number = nums[i]
+                let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
+                let comicInfo = arrayOfImgSrc[2]
+                let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
+                comic.imageLink = "http://" + (arrayOfComicInfo[0] )
+                comic.title = arrayOfComicInfo[4] 
+                comic.alt = arrayOfComicInfo[2] 
+                comic.description = ""
+                comic.date = ""
+                
+                dispatch_async(dispatch_get_main_queue(), {
                     self.objects.append(comic)
-                    
                     let indexPath = NSIndexPath(forRow: self.objects.count-1, inSection: 0)
                     self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
-//                    let cell = self.tableView.cellForRowAtIndexPath(indexPath)
-                    
-//                    self.tableView.reloadData()
-                    
-                }
+                    self.tableView.reloadData()
+                })
+                
+            }
             
             self.stopLoading()
-            
-            self.reloadTable()
-            
-//            self.tableView.reloadData()
-            
-//            }
-            
         
         }
         
     }
     
-    func reloadTable() {
-        
-        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            self.tableView.reloadData()
-//            self.tableView.reloadSections(NSIndexSet(index: 0), withRowAnimation: .Automatic)
-            
-//            var indexPaths = [NSIndexPath]()
-//            
-//            for var i = 0; i < self.objects.count; i++ {
-//                indexPaths.append(NSIndexPath(forRow: i, inSection: 0))
-//            }
-//            indexPaths.append(NSIndexPath(forRow: 0, inSection: 1))
-//            
-//            self.tableView.reloadRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
-            
-        })
-        
-    }
     
     // *****************
     // MARK: - XMLParser
@@ -366,8 +322,6 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             
         }
         
-        
-//        self.tableView.reloadData()
     }
 
     // MARK: - Segues
