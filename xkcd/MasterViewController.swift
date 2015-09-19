@@ -33,11 +33,11 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        var refreshControl = UIRefreshControl()
-        
-        self.refreshControl?.attributedTitle = NSAttributedString(string: "Pull to refresh")
-        self.refreshControl?.addTarget(self, action: "refresh:", forControlEvents: UIControlEvents.ValueChanged)
-        self.tableView.addSubview(refreshControl)
+//        var refreshControl = UIRefreshControl()
+//        
+//        self.refreshControl?.attributedTitle = NSAttributedString(string: "Pull to refresh")
+//        self.refreshControl?.addTarget(self, action: "refresh:", forControlEvents: UIControlEvents.ValueChanged)
+//        self.tableView.addSubview(refreshControl)
         
         startLoading()
         
@@ -46,15 +46,15 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
     }
     
-    func refresh(sender: AnyObject) {
-        
-        self.objects.removeAll(keepCapacity: true)
-
-        self.refreshControl?.endRefreshing()
-        self.startLoading()
-        getRSS()
-        
-    }
+//    func refresh(sender: AnyObject) {
+//        
+//        self.objects.removeAll(keepCapacity: true)
+//
+//        self.refreshControl?.endRefreshing()
+//        self.startLoading()
+//        getRSS()
+//        
+//    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -189,6 +189,84 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
     }
     
+    func loadMoreComics() {
+        
+        self.startLoading()
+        
+        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+        dispatch_async(dispatch_get_global_queue(priority, 0)) {
+            
+//            dispatch_async(dispatch_get_main_queue()) {
+            
+                let lowestNumberString = (self.objects[self.objects.count-1] as! Comic).number
+                let lowestNumberInt = lowestNumberString.toInt()
+                var nums = [String]()
+                
+                for var i = lowestNumberInt! - 1; i >= lowestNumberInt! - 10; i-- {
+                    nums.append(i.description)
+                }
+                
+                for var i = 0; i < nums.count; i++ {
+                    
+                    let urlString = NSURL(string: "http://xkcd.com/" + nums[i])
+                    let urlRequest = NSURLRequest(URL: urlString!)
+                    var data = NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil, error: nil)
+                    var stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
+                    
+                    let comic = Comic()
+                    comic.link = urlString!.description
+                    comic.number = nums[i]
+                    let arrayOfImgSrc:[NSString] = stringData?.componentsSeparatedByString("<img src=\"//") as! [NSString]
+                    let comicInfo = arrayOfImgSrc[2]
+                    let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
+                    comic.imageLink = "http://" + (arrayOfComicInfo[0] as! String)
+                    comic.title = arrayOfComicInfo[4] as! String
+                    comic.alt = arrayOfComicInfo[2] as! String
+                    comic.description = ""
+                    comic.date = ""
+                    
+                    self.objects.append(comic)
+                    
+                    let indexPath = NSIndexPath(forRow: self.objects.count-1, inSection: 0)
+                    self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+                    let cell = self.tableView.cellForRowAtIndexPath(indexPath)
+                    
+//                    self.tableView.reloadData()
+                    
+                }
+            
+            self.stopLoading()
+            
+            self.reloadTable()
+            
+//            self.tableView.reloadData()
+            
+//            }
+            
+        
+        }
+        
+    }
+    
+    func reloadTable() {
+        
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            self.tableView.reloadData()
+//            self.tableView.reloadSections(NSIndexSet(index: 0), withRowAnimation: .Automatic)
+            
+//            var indexPaths = [NSIndexPath]()
+//            
+//            for var i = 0; i < self.objects.count; i++ {
+//                indexPaths.append(NSIndexPath(forRow: i, inSection: 0))
+//            }
+//            indexPaths.append(NSIndexPath(forRow: 0, inSection: 1))
+//            
+//            self.tableView.reloadRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+            
+        })
+        
+    }
+    
     // *****************
     // MARK: - XMLParser
     // *****************
@@ -265,7 +343,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             entryItem.description = entryDescription
             var descriptionArr = entryItem.description.componentsSeparatedByString("\"")
             var dateArr = entryDate.componentsSeparatedByString(" ")
-            entryItem.date = entryItem.number + " | " + dateArr[0] + " " + dateArr[1] + " " + dateArr[2] + " " + dateArr[3]
+            entryItem.date = dateArr[0] + " " + dateArr[1] + " " + dateArr[2] + " " + dateArr[3]
             entryItem.imageLink = descriptionArr[1]
             entryItem.alt = descriptionArr[3]
             objects.append(entryItem)
@@ -309,24 +387,44 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     // MARK: - Table View
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
+        return 2
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         self.tableView.cellForRowAtIndexPath(indexPath)?.selected = false
+        
+        if indexPath.section == 1 {
+            self.loadMoreComics()
+        }
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return objects.count
+        if section == 0 {
+            return objects.count
+        }
+        else {
+            return 1
+        }
     }
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
+        if indexPath.section == 0 {
+            let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
 
-        let object = objects[indexPath.row] as! Comic
-        cell.textLabel!.text = object.title
-        cell.detailTextLabel?.text = object.date
-        return cell
+            let object = objects[indexPath.row] as! Comic
+            cell.textLabel!.text = object.title
+            if object.date == "" {
+                cell.detailTextLabel?.text = object.number
+            }
+            else {
+                cell.detailTextLabel?.text = object.number + " | " + object.date
+            }
+            return cell
+        }
+        else {
+            let cell = tableView.dequeueReusableCellWithIdentifier("Cell2", forIndexPath: indexPath) as! UITableViewCell
+            return cell
+        }
     }
 
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
