@@ -20,6 +20,10 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     var xmlParser: NSXMLParser!
     
     var searchComic: Comic = Comic()
+    
+    var newComicsFromRSS = [Comic]()
+    
+    let kAllComics = "comics"
 
 
     // ******************
@@ -34,6 +38,8 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         
         startLoading()
+        
+        self.loadComics()
         
         // parse RSS
         getRSS()
@@ -140,6 +146,37 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
     }
     
+    func saveComics() {
+        
+        var dictionary:[NSDictionary] = []
+        for var i = 0; i < self.objects.count; i++ {
+            dictionary.append((objects[i] as! Comic).dictionary())
+        }
+        NSUserDefaults.standardUserDefaults().setObject(dictionary, forKey: kAllComics)
+        
+    }
+    
+    func loadComics() {
+        
+        let defaults:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+        let savedData:[NSDictionary]? = defaults.objectForKey(kAllComics) as? [NSDictionary]
+        if let data:[NSDictionary] = savedData {
+            for var i = 0; i < data.count; i++ {
+                let c:Comic = Comic()
+                c.title = data[i].valueForKey("title") as! String
+                c.link = data[i].valueForKey("link") as! String
+                c.description = data[i].valueForKey("description") as! String
+                c.date = data[i].valueForKey("date") as! String
+                c.imageLink = data[i].valueForKey("imageLink") as! String
+                c.alt = data[i].valueForKey("alt") as! String
+                c.number = data[i].valueForKey("number") as! String
+                
+                objects.append(c)
+            }
+        }
+        
+    }
+    
     /**
         getRSS()
         Downloads the RSS feed in XML form and calls the parser
@@ -155,6 +192,68 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             self.xmlParser = NSXMLParser(data: data!)
             self.xmlParser.delegate = self
             self.xmlParser.parse()
+            
+            if self.objects.count > 0 {
+                let latestComicNumber = Int((self.objects[0] as! Comic).number)
+
+                if Int(self.newComicsFromRSS[3].number) > latestComicNumber {
+                    self.objects.insert(self.newComicsFromRSS[3], atIndex: 0)
+                    self.objects.insert(self.newComicsFromRSS[2], atIndex: 0)
+                    self.objects.insert(self.newComicsFromRSS[1], atIndex: 0)
+                    self.objects.insert(self.newComicsFromRSS[0], atIndex: 0)
+                    
+                    if Int((self.objects[3] as! Comic).number)! - 1 > Int((self.objects[4] as! Comic).number)! {
+                        
+                        //find the numbers between objects[3] and objects[4] and load them in
+                        let objects3num = Int((self.objects[3] as! Comic).number)
+                        let objects4num = Int((self.objects[4] as! Comic).number)
+                        
+                        var numsToLoad = [Int]()
+                        
+                        for var i = objects3num! - 1; i > objects4num; i-- {
+                            numsToLoad.append(i)
+                        }
+                        
+                        var comicArray: [Comic] = self.loadComicsWithNumbers(numsToLoad)
+                        
+                        dispatch_async(dispatch_get_main_queue(), {
+                            
+                            for var i = 0; i < comicArray.count; i++ {
+                                self.objects.insert(comicArray[i], atIndex: 4)
+                                let indexPath = NSIndexPath(forRow: self.objects.count-1, inSection: 0)
+                                self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+                                self.tableView.reloadData()
+                            }
+                            
+                        })
+
+                        
+                    }
+                    
+                }
+                else if Int(self.newComicsFromRSS[2].number) > latestComicNumber {
+                    self.objects.insert(self.newComicsFromRSS[2], atIndex: 0)
+                    self.objects.insert(self.newComicsFromRSS[1], atIndex: 0)
+                    self.objects.insert(self.newComicsFromRSS[0], atIndex: 0)
+                }
+                else if Int(self.newComicsFromRSS[1].number) > latestComicNumber {
+                    self.objects.insert(self.newComicsFromRSS[1], atIndex: 0)
+                    self.objects.insert(self.newComicsFromRSS[0], atIndex: 0)
+                }
+                else if Int(self.newComicsFromRSS[0].number) > latestComicNumber {
+                    self.objects.insert(self.newComicsFromRSS[0], atIndex: 0)
+                }
+                
+            }
+            
+            else {
+                for var i = 0; i < self.newComicsFromRSS.count; i++ {
+                    self.objects.append(self.newComicsFromRSS[i])
+                }
+            }
+            
+            self.saveComics()
+            
         }
         
     }
@@ -170,6 +269,37 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     func stopLoading() {
         
         self.dismissViewControllerAnimated(true, completion: nil)
+        
+    }
+    
+    func loadComicsWithNumbers(nums: [Int]) -> [Comic] {
+        
+        var returnArray = [Comic]()
+        
+        for var i = 0; i < nums.count; i++ {
+            
+            let urlString = NSURL(string: "http://xkcd.com/" + nums[i].description)
+            let urlRequest = NSURLRequest(URL: urlString!)
+            let data = try? NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil)
+            let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
+            
+            let comic = Comic()
+            comic.link = urlString!.description
+            comic.number = nums[i].description
+            let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
+            let comicInfo = arrayOfImgSrc[2]
+            let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
+            comic.imageLink = "http://" + (arrayOfComicInfo[0] )
+            comic.title = arrayOfComicInfo[4]
+            comic.alt = arrayOfComicInfo[2]
+            comic.description = ""
+            comic.date = ""
+            
+            returnArray.append(comic)
+            
+        }
+        
+        return returnArray
         
     }
     
@@ -217,8 +347,18 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             }
             
             self.stopLoading()
+            
+            self.saveComics()
         
         }
+        
+    }
+    
+    @IBAction func refresh(sender: UIRefreshControl) {
+        
+        self.getRSS()
+        
+        sender.endRefreshing()
         
     }
     
@@ -302,7 +442,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             entryItem.date = dateArr[0] + " " + dateArr[1] + " " + dateArr[2] + " " + dateArr[3]
             entryItem.imageLink = descriptionArr[1]
             entryItem.alt = descriptionArr[3]
-            objects.append(entryItem)
+            newComicsFromRSS.append(entryItem)
             weAreInsideAnItem = false
         }
     }

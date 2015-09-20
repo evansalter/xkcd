@@ -18,4 +18,10 @@ class Comic {
     var alt: String = ""
     var number: String = ""
     
+    func dictionary() -> NSDictionary {
+
+        return["title":title,"link":link,"description":description,"date":date,"imageLink":imageLink,"alt":alt,"number":number]
+        
+    }
+    
 }
