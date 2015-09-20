@@ -83,6 +83,13 @@ class DetailViewController: UIViewController {
         
     }
     
+    @IBAction func explainButtonPressed(sender: AnyObject) {
+        
+        let url = NSURL(string: "http://explainxkcd.com/wiki/index.php/" + (detailItem?.number)!)
+        UIApplication.sharedApplication().openURL(url!)
+        
+    }
+    
     @IBAction func infoButtonPressed(sender: AnyObject) {
                 
         let url = detailItem?.link

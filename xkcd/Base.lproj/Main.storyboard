@@ -176,7 +176,13 @@
                             <constraint firstItem="1nh-AL-ZHC" firstAttribute="top" secondItem="cIm-e0-J51" secondAttribute="bottom" constant="235" id="qN2-Bq-tPd"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Detail" id="cra-N8-TIN"/>
+                    <navigationItem key="navigationItem" title="Detail" id="cra-N8-TIN">
+                        <barButtonItem key="rightBarButtonItem" title="Explain" id="i77-2k-uCc">
+                            <connections>
+                                <action selector="explainButtonPressed:" destination="Ah7-4n-0Wa" id="PxX-90-p7x"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="imgView" destination="bRt-c5-9uu" id="fbw-LV-wBG"/>
                         <outlet property="loadingLabel" destination="1nh-AL-ZHC" id="0cv-EW-n9v"/>
