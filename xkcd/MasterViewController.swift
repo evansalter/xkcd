@@ -14,21 +14,26 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     // MARK: - Instance Variables
     // **************************
     
+    // Array of Comic objects to list on main page
     var objects = [AnyObject]()
     
     // XML parser object to parse RSS feed
     var xmlParser: NSXMLParser!
     
+    // Stores the comic that was searched for for passing to DetailViewController
     var searchComic: Comic = Comic()
     
+    // List of new comics loaded from the RSS feed for updating the list
     var newComicsFromRSS = [Comic]()
     
+    // Key for saving and loading to NSUserDefaults
     let kAllComics = "comics"
 
 
     // ******************
     // MARK: - View Setup
     // ******************
+    
     override func awakeFromNib() {
         super.awakeFromNib()
     }
@@ -37,8 +42,10 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        // Show loading indicator
         startLoading()
         
+        // Load the comics from 
         self.loadComics()
         
         // parse RSS
@@ -50,17 +57,36 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-    func insertNewObject(sender: AnyObject) {
-        objects.insert(NSDate(), atIndex: 0)
-        let indexPath = NSIndexPath(forRow: 0, inSection: 0)
-        self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+    
+    /// Shows a loading indicator to be used when downloading data
+    func startLoading() {
+        
+        let alertView = UIAlertController(title: "Loading...", message: nil, preferredStyle: UIAlertControllerStyle.Alert)
+        
+        self.presentViewController(alertView, animated: true, completion: nil)
+        
     }
     
+    /// Removes the loading indicator presented by `startLoading()`
+    func stopLoading() {
+        
+        self.dismissViewControllerAnimated(true, completion: nil)
+        
+    }
+    
+    // **************
+    // MARK: - Search
+    // **************
+    
+    /// UI to search for a particular comic by its comic number
+    /// 
+    /// Presents an alert with a text box to accept the comic number by the user
     @IBAction func searchButtonPressed(sender: AnyObject) {
         
+        // initiallize the alert
         let alertController = UIAlertController(title: "Find Comic", message: "Enter the number of the comic to open:", preferredStyle: .Alert)
         
+        // call searchForComicByNumber() when the text is submitted
         let submitAction = UIAlertAction(title: "Submit", style: .Default) { (_) in
             
             let comicField = alertController.textFields![0] 
@@ -69,15 +95,19 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             
         }
         
+        // disable the submit when there is no data in the text field
         submitAction.enabled = false
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (_) in }
         
+        // add the text field
         alertController.addTextFieldWithConfigurationHandler { (textField) in
             
             textField.placeholder = "Comic number"
             
+            // when there is text in the text field...
             NSNotificationCenter.defaultCenter().addObserverForName(UITextFieldTextDidChangeNotification, object: textField, queue: NSOperationQueue.mainQueue()) { (notification) in
+                // ...enable the submit button
                 submitAction.enabled = textField.text != ""
             }
             
@@ -86,27 +116,37 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         alertController.addAction(submitAction)
         alertController.addAction(cancelAction)
         
+        // present the alert
         self.presentViewController(alertController, animated: true, completion: nil)
         
     }
     
+    /// Performs the search for the comic with the number inputted by searchButtonPressed()
+    ///
+    /// - parameters:
+    ///     - string: `String` containing the comic number
     func searchForComicByNumber(string: String) {
         
         let urlString = NSURL(string: "http://xkcd.com/" + string)
         let urlRequest = NSURLRequest(URL: urlString!)
         let queue = NSOperationQueue()
         
+        // send an asynchronous request for the HTML data on the comic page
         NSURLConnection.sendAsynchronousRequest(urlRequest, queue: queue) {
             (response, data, error) -> Void in
             let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
 
+            // if the HTML for the page is less than 400 characters, it is an error page and there is no comic there
             if(stringData!.length < 400){
+                // present an "invalid number" error
                 self.invalidNumberError(string)
             }
             else {
                 let comic = Comic()
                 comic.link = urlString!.description
                 comic.number = string
+                // my janky way of parsing HTML
+                // splits the data into arrays of Strings based on certain characters
                 let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
                 let comicInfo = arrayOfImgSrc[2]
                 let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
@@ -116,8 +156,11 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                 comic.description = ""
                 comic.date = ""
                 
+                // set the searchComic instance variable to the comic.
+                // the DetailViewController will grab the comic from that variable after we do the segue
                 self.searchComic = comic
             
+                // perform the segue on the main queue
                 let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
                 dispatch_async(dispatch_get_global_queue(priority, 0)) {
                     
@@ -135,6 +178,10 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
     }
     
+    /// Presents an error when the comic number to search for is not valid
+    ///
+    /// - parameters:
+    ///     - num: `String` containing the invalid number
     func invalidNumberError(num: String) {
         
         let alertView = UIAlertController(title: "Invalid Comic Number", message: "Comic " + num + " does not exist.", preferredStyle: .Alert)
@@ -146,16 +193,23 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
     }
     
+    // ***************
+    // MARK: - Storage
+    // ***************
+    
+    /// Saves the comics that are currently in the list to user defaults
     func saveComics() {
         
         var dictionary:[NSDictionary] = []
         for var i = 0; i < self.objects.count; i++ {
+            // use the dictionary() method in the Comic class to convert the Comic objects to NSDictionaries
             dictionary.append((objects[i] as! Comic).dictionary())
         }
         NSUserDefaults.standardUserDefaults().setObject(dictionary, forKey: kAllComics)
         
     }
     
+    /// Loads the comics from user defaults to the list
     func loadComics() {
         
         let defaults:NSUserDefaults = NSUserDefaults.standardUserDefaults()
@@ -177,31 +231,44 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
     }
     
-    /**
-        getRSS()
-        Downloads the RSS feed in XML form and calls the parser
-    */
+    // **************************
+    // MARK: - Downloading Comics
+    // **************************
+    
+    /// Downloads the RSS feed from xkcd.com and calls the XML parser to parse it, resulting in the 4 most recent comics.
+    ///
+    /// After parsing, the function checks which comics, if any, are new, and places them in the correct spot in the objects array.
+    ///
+    /// If there are comics missing in the list between the oldest one in the RSS feed, and the newest one in the list, it will load those.
+    /// 
+    /// For example, if objects=[1234, 1233, 1232, ...] and `getRSS()` returns [1240, 1239, 1238, 1237], then 1236 and 1235 will also be loaded
     func getRSS() {
         
         let urlString = NSURL(string: "http://xkcd.com/rss.xml")
         let rssUrlRequest:NSURLRequest = NSURLRequest(URL: urlString!)
         let queue:NSOperationQueue = NSOperationQueue()
         
+        // perform an asynchronous request to download the RSS feed in XML form
         NSURLConnection.sendAsynchronousRequest(rssUrlRequest, queue: queue) {
             (response, data, error) -> Void in
+            // parse the data.  This adds the new comics to an array of Comic called newComicsFromRSS
             self.xmlParser = NSXMLParser(data: data!)
             self.xmlParser.delegate = self
             self.xmlParser.parse()
             
+            // if objects[] is not empty, we have to figure out which comics need to be added, and where
             if self.objects.count > 0 {
+                // the number of the current newest comic in the list
                 let latestComicNumber = Int((self.objects[0] as! Comic).number)
 
+                // if the oldest comic from the RSS feed is newer than the newest comic in the list, then we add them all to the front
                 if Int(self.newComicsFromRSS[3].number) > latestComicNumber {
                     self.objects.insert(self.newComicsFromRSS[3], atIndex: 0)
                     self.objects.insert(self.newComicsFromRSS[2], atIndex: 0)
                     self.objects.insert(self.newComicsFromRSS[1], atIndex: 0)
                     self.objects.insert(self.newComicsFromRSS[0], atIndex: 0)
                     
+                    // check to see if there are any comics missing in the list between the new ones added and the pre-existing ones
                     if Int((self.objects[3] as! Comic).number)! - 1 > Int((self.objects[4] as! Comic).number)! {
                         
                         //find the numbers between objects[3] and objects[4] and load them in
@@ -210,15 +277,20 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                         
                         var numsToLoad = [Int]()
                         
+                        // add each comic number to the array
                         for var i = objects3num! - 1; i > objects4num; i-- {
                             numsToLoad.append(i)
                         }
                         
+                        // download the comics and add them to the array
                         var comicArray: [Comic] = self.loadComicsWithNumbers(numsToLoad)
                         
+                        // perform UI updates on the main thread
                         dispatch_async(dispatch_get_main_queue(), {
                             
+                            // insert the missing comics
                             for var i = 0; i < comicArray.count; i++ {
+                                // insert at index 4 because that is between the new and old comics
                                 self.objects.insert(comicArray[i], atIndex: 4)
                                 let indexPath = NSIndexPath(forRow: self.objects.count-1, inSection: 0)
                                 self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
@@ -231,51 +303,49 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                     }
                     
                 }
+                // there is one overlapping comic, so add the 3 newest
                 else if Int(self.newComicsFromRSS[2].number) > latestComicNumber {
                     self.objects.insert(self.newComicsFromRSS[2], atIndex: 0)
                     self.objects.insert(self.newComicsFromRSS[1], atIndex: 0)
                     self.objects.insert(self.newComicsFromRSS[0], atIndex: 0)
                 }
+                // there are two overlapping comics, so add the 2 newest
                 else if Int(self.newComicsFromRSS[1].number) > latestComicNumber {
                     self.objects.insert(self.newComicsFromRSS[1], atIndex: 0)
                     self.objects.insert(self.newComicsFromRSS[0], atIndex: 0)
                 }
+                // there are 3 overlapping comics, so add the 1 newest
                 else if Int(self.newComicsFromRSS[0].number) > latestComicNumber {
                     self.objects.insert(self.newComicsFromRSS[0], atIndex: 0)
                 }
                 
             }
             
+            // objects[] is empty, so add all the new comics into the list
             else {
                 for var i = 0; i < self.newComicsFromRSS.count; i++ {
                     self.objects.append(self.newComicsFromRSS[i])
                 }
             }
             
+            // save the comics list
             self.saveComics()
             
         }
         
     }
     
-    func startLoading() {
-        
-        let alertView = UIAlertController(title: "Loading...", message: nil, preferredStyle: UIAlertControllerStyle.Alert)
-        
-        self.presentViewController(alertView, animated: true, completion: nil)
-        
-    }
-    
-    func stopLoading() {
-        
-        self.dismissViewControllerAnimated(true, completion: nil)
-        
-    }
-    
+    /// Loads the comics with the specified comic numbers into the list
+    ///
+    /// - parameters:
+    ///     - nums: `Int` array containing the numbers of the comics to load
+    /// - returns: Array of `Comic` containing the downloaded comics
     func loadComicsWithNumbers(nums: [Int]) -> [Comic] {
         
+        // array of Comic to return
         var returnArray = [Comic]()
         
+        // download each Comic, parse it, and add it to the array
         for var i = 0; i < nums.count; i++ {
             
             let urlString = NSURL(string: "http://xkcd.com/" + nums[i].description)
@@ -299,25 +369,32 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             
         }
         
+        // return the Comic array
         return returnArray
         
     }
     
+    /// Loads 10 more comics at the end of the list
     func loadMoreComics() {
         
+        // display the loading indicator
         self.startLoading()
         
         let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
         dispatch_async(dispatch_get_global_queue(priority, 0)) {
         
+            // find the lowest comic number in the list
             let lowestNumberString = (self.objects[self.objects.count-1] as! Comic).number
             let lowestNumberInt = Int(lowestNumberString)
+            // array to hold the comic numbers to download
             var nums = [String]()
             
+            // find the next 10 comic numbers and add them to the nums array
             for var i = lowestNumberInt! - 1; i >= lowestNumberInt! - 10; i-- {
                 nums.append(i.description)
             }
             
+            // for each number in the nums array, download that comic, parse it, and append it to objects[]
             for var i = 0; i < nums.count; i++ {
                 
                 let urlString = NSURL(string: "http://xkcd.com/" + nums[i])
@@ -337,6 +414,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                 comic.description = ""
                 comic.date = ""
                 
+                // perform the UI updates on the main thread
                 dispatch_async(dispatch_get_main_queue(), {
                     self.objects.append(comic)
                     let indexPath = NSIndexPath(forRow: self.objects.count-1, inSection: 0)
@@ -346,18 +424,23 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                 
             }
             
+            // remove the loading indicator
             self.stopLoading()
             
+            // save the comic list
             self.saveComics()
         
         }
         
     }
     
+    /// Checks for new comics to add to the list when pull-to-refresh is activated
     @IBAction func refresh(sender: UIRefreshControl) {
         
+        // check for new comics
         self.getRSS()
         
+        // stop the refreshControll spinner
         sender.endRefreshing()
         
     }
@@ -464,7 +547,9 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
     }
 
+    // **************
     // MARK: - Segues
+    // **************
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "showDetail" {
@@ -478,7 +563,9 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         }
     }
 
+    // ******************
     // MARK: - Table View
+    // ******************
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 2

@@ -18,6 +18,9 @@ class Comic {
     var alt: String = ""
     var number: String = ""
     
+    /// Create a dictionary of the object's variables for storing in user defaults
+    ///
+    /// - returns: `NSDictionary` containing all the variables of the object.
     func dictionary() -> NSDictionary {
 
         return["title":title,"link":link,"description":description,"date":date,"imageLink":imageLink,"alt":alt,"number":number]
