@@ -29,6 +29,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     // Key for saving and loading to NSUserDefaults
     let kAllComics = "comics"
 
+    @IBOutlet weak var progressView: UIProgressView!
 
     // ******************
     // MARK: - View Setup
@@ -41,6 +42,9 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        // Initialize progress bar
+        progressView.setProgress(0.0, animated: false)
         
         // Show loading indicator
         startLoading()
@@ -445,10 +449,84 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         
     }
     
+    @IBAction func downloadAllButtonPressed(sender: AnyObject) {
+        
+       // confirmation alert
+        let alertView = UIAlertController(title: "Download All Comics", message: "This action will download all comics.  Would you like to continue?", preferredStyle: .Alert)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
+        let continueAction = UIAlertAction(title: "Continue", style: .Default) { (_) in
+            let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+            dispatch_async(dispatch_get_global_queue(priority, 0)){
+                self.downloadAllComics()
+            }
+        }
+        
+        alertView.addAction(cancelAction)
+        alertView.addAction(continueAction)
+        
+        self.presentViewController(alertView, animated: true, completion: nil)
+        
+    }
+    
+    func downloadAllComics() {
+        
+        let lowestComicNumber = Int((objects[objects.count-1] as! Comic).number);
+        let currentComic = lowestComicNumber! - 1
+        
+        print(lowestComicNumber)
+        print(currentComic)
+        
+        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+        dispatch_async(dispatch_get_global_queue(priority, 0)) {
+            
+            for var i = currentComic; i > 0; i-- {
+                if i == 1 {
+                    self.progressView.setProgress(0.0, animated: true)
+                }
+                else{
+                    let progress: Float = (Float(lowestComicNumber!) - Float(i)) / Float(lowestComicNumber!)
+                    self.progressView.setProgress(progress, animated: true)
+                }
+                
+                let urlString = NSURL(string: "http://xkcd.com/" + i.description)
+                let urlRequest = NSURLRequest(URL: urlString!)
+                let data = try? NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil)
+                let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
+                
+                let comic = Comic()
+                comic.link = urlString!.description
+                comic.number = i.description
+                let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
+                if arrayOfImgSrc.count >= 3 {
+                    let comicInfo = arrayOfImgSrc[2]
+                    let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
+                    comic.imageLink = "http://" + (arrayOfComicInfo[0] )
+                    comic.title = arrayOfComicInfo[4]
+                    comic.alt = arrayOfComicInfo[2]
+                }
+                comic.description = ""
+                comic.date = ""
+                
+                // perform the UI updates on the main thread
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.objects.append(comic)
+                    let indexPath = NSIndexPath(forRow: self.objects.count-1, inSection: 0)
+                    self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+                    self.tableView.reloadData()
+                    self.saveComics()
+                    
+                })
+
+            }
+            
+        }
+    }
     
     // *****************
     // MARK: - XMLParser
     // *****************
+    
+    // This should be in its own class
     
     var entryTitle: String!
     var entryLink: String!

@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
         <!--Master-->
@@ -30,9 +31,14 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <progressView key="tableHeaderView" opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" id="jPa-Ae-zMs">
+                            <rect key="frame" x="0.0" y="64" width="600" height="2"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <animations/>
+                        </progressView>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" textLabel="2pz-XF-uhl" detailTextLabel="epK-fd-Lpk" style="IBUITableViewCellStyleSubtitle" id="m0d-ak-lc9">
-                                <rect key="frame" x="0.0" y="86" width="600" height="44"/>
+                                <rect key="frame" x="0.0" y="88" width="600" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="m0d-ak-lc9" id="d3P-M7-ByW">
                                     <rect key="frame" x="0.0" y="0.0" width="567" height="43.5"/>
@@ -64,7 +70,7 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell2" textLabel="JzS-rK-iSN" style="IBUITableViewCellStyleDefault" id="HgR-qp-0yG">
-                                <rect key="frame" x="0.0" y="130" width="600" height="44"/>
+                                <rect key="frame" x="0.0" y="132" width="600" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="HgR-qp-0yG" id="ggg-jQ-Bbq">
                                     <rect key="frame" x="0.0" y="0.0" width="567" height="43.5"/>
@@ -92,11 +98,18 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="xkcd" id="tQt-TN-PWz">
-                        <barButtonItem key="rightBarButtonItem" systemItem="search" id="lEQ-4V-QKG">
-                            <connections>
-                                <action selector="searchButtonPressed:" destination="pGg-6v-bdr" id="pBL-Ei-hyT"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="search" id="lEQ-4V-QKG">
+                                <connections>
+                                    <action selector="searchButtonPressed:" destination="pGg-6v-bdr" id="pBL-Ei-hyT"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem image="Download" id="SRA-V8-PmW">
+                                <connections>
+                                    <action selector="downloadAllButtonPressed:" destination="pGg-6v-bdr" id="6jx-Ny-aP3"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="4Uc-EO-6YU">
                         <autoresizingMask key="autoresizingMask"/>
@@ -106,6 +119,7 @@
                         </connections>
                     </refreshControl>
                     <connections>
+                        <outlet property="progressView" destination="jPa-Ae-zMs" id="4IG-9Z-wcD"/>
                         <segue destination="Ah7-4n-0Wa" kind="show" identifier="showDetailManual" id="TMZ-q2-MK2"/>
                     </connections>
                 </tableViewController>
@@ -200,6 +214,9 @@
             <point key="canvasLocation" x="1343" y="64"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Download" width="22" height="22"/>
+    </resources>
     <inferredMetricsTieBreakers>
         <segue reference="TMZ-q2-MK2"/>
     </inferredMetricsTieBreakers>

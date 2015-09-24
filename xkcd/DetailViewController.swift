@@ -34,12 +34,14 @@ class DetailViewController: UIViewController {
         // perform an asynchronous request for the image
         NSURLConnection.sendAsynchronousRequest(imageRequest, queue: queue, completionHandler: {response, imgData, error in
             
+            if error == nil {
                 // once the image has loaded, hide the loading message
                 self.loadingLabel?.hidden = true
                 // present the image in the image view
                 let image = UIImage(data: imgData!)
                 self.imgView?.image = image
-                    
+            }
+            
             }
         )
         
