@@ -6,7 +6,7 @@ A simple iOS app for viewing the latest XKCD comics.  Currently a work in progre
 
 ![Screenshot 1](/Screenshots/1.png?raw=true "Home")
 
-![Screenshot 2](/Screenshots/2.png?raw=true "More")
+![Screenshot 2](/Screenshots/2.png?raw=true "Download all")
 
 ![Screenshot 3](/Screenshots/3.png?raw=true "Search")
 

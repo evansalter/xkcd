@@ -10,6 +10,11 @@ import UIKit
 
 class MasterViewController: UITableViewController, NSXMLParserDelegate {
     
+    
+    // TODO: Check for network connectivity before attempting to download data
+    
+    
+    
     // **************************
     // MARK: - Instance Variables
     // **************************
@@ -29,6 +34,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     // Key for saving and loading to NSUserDefaults
     let kAllComics = "comics"
 
+    // Progress bar
     @IBOutlet weak var progressView: UIProgressView!
 
     // ******************
@@ -130,6 +136,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     /// - parameters:
     ///     - string: `String` containing the comic number
     func searchForComicByNumber(string: String) {
+        
         
         let urlString = NSURL(string: "http://xkcd.com/" + string)
         let urlRequest = NSURLRequest(URL: urlString!)
@@ -526,7 +533,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     // MARK: - XMLParser
     // *****************
     
-    // This should be in its own class
+    // TODO: This should be in its own class
     
     var entryTitle: String!
     var entryLink: String!
