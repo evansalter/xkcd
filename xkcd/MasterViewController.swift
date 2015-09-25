@@ -154,19 +154,8 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                 self.invalidNumberError(string)
             }
             else {
-                let comic = Comic()
-                comic.link = urlString!.description
-                comic.number = string
-                // my janky way of parsing HTML
-                // splits the data into arrays of Strings based on certain characters
-                let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
-                let comicInfo = arrayOfImgSrc[2]
-                let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
-                comic.imageLink = "http://" + (arrayOfComicInfo[0] )
-                comic.title = arrayOfComicInfo[4] 
-                comic.alt = arrayOfComicInfo[2] 
-                comic.description = ""
-                comic.date = ""
+                
+                let comic = self.downloadComicWithNumber(string)
                 
                 // set the searchComic instance variable to the comic.
                 // the DetailViewController will grab the comic from that variable after we do the segue
@@ -360,22 +349,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         // download each Comic, parse it, and add it to the array
         for var i = 0; i < nums.count; i++ {
             
-            let urlString = NSURL(string: "http://xkcd.com/" + nums[i].description)
-            let urlRequest = NSURLRequest(URL: urlString!)
-            let data = try? NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil)
-            let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
-            
-            let comic = Comic()
-            comic.link = urlString!.description
-            comic.number = nums[i].description
-            let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
-            let comicInfo = arrayOfImgSrc[2]
-            let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
-            comic.imageLink = "http://" + (arrayOfComicInfo[0] )
-            comic.title = arrayOfComicInfo[4]
-            comic.alt = arrayOfComicInfo[2]
-            comic.description = ""
-            comic.date = ""
+            let comic = downloadComicWithNumber(nums[i].description)
             
             returnArray.append(comic)
             
@@ -409,22 +383,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             // for each number in the nums array, download that comic, parse it, and append it to objects[]
             for var i = 0; i < nums.count; i++ {
                 
-                let urlString = NSURL(string: "http://xkcd.com/" + nums[i])
-                let urlRequest = NSURLRequest(URL: urlString!)
-                let data = try? NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil)
-                let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
-                
-                let comic = Comic()
-                comic.link = urlString!.description
-                comic.number = nums[i]
-                let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
-                let comicInfo = arrayOfImgSrc[2]
-                let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
-                comic.imageLink = "http://" + (arrayOfComicInfo[0] )
-                comic.title = arrayOfComicInfo[4] 
-                comic.alt = arrayOfComicInfo[2] 
-                comic.description = ""
-                comic.date = ""
+                let comic = self.downloadComicWithNumber(nums[i])
                 
                 // perform the UI updates on the main thread
                 dispatch_async(dispatch_get_main_queue(), {
@@ -502,24 +461,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                     self.progressView.setProgress(progress, animated: true)
                 }
                 
-                let urlString = NSURL(string: "http://xkcd.com/" + i.description)
-                let urlRequest = NSURLRequest(URL: urlString!)
-                let data = try? NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil)
-                let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
-                
-                let comic = Comic()
-                comic.link = urlString!.description
-                comic.number = i.description
-                let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
-                if arrayOfImgSrc.count >= 3 {
-                    let comicInfo = arrayOfImgSrc[2]
-                    let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
-                    comic.imageLink = "http://" + (arrayOfComicInfo[0] )
-                    comic.title = arrayOfComicInfo[4]
-                    comic.alt = arrayOfComicInfo[2]
-                }
-                comic.description = ""
-                comic.date = ""
+                let comic = self.downloadComicWithNumber(i.description)
                 
                 // perform the UI updates on the main thread
                 dispatch_async(dispatch_get_main_queue(), {
@@ -543,6 +485,31 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         dispatch_async(dispatch_get_main_queue(), {
             self.refreshControl?.enabled = true
         })
+    }
+    
+    func downloadComicWithNumber(number: String) -> Comic {
+        
+        let urlString = NSURL(string: "http://xkcd.com/" + number)
+        let urlRequest = NSURLRequest(URL: urlString!)
+        let data = try? NSURLConnection.sendSynchronousRequest(urlRequest, returningResponse: nil)
+        let stringData = NSString(data: data!, encoding: NSUTF8StringEncoding)
+        
+        let comic = Comic()
+        comic.link = urlString!.description
+        comic.number = number
+        let arrayOfImgSrc:[NSString] = (stringData?.componentsSeparatedByString("<img src=\"//"))! as [NSString]
+        if arrayOfImgSrc.count >= 3 {
+            let comicInfo = arrayOfImgSrc[2]
+            let arrayOfComicInfo = comicInfo.componentsSeparatedByString("\"")
+            comic.imageLink = "http://" + (arrayOfComicInfo[0] )
+            comic.title = arrayOfComicInfo[4]
+            comic.alt = arrayOfComicInfo[2]
+        }
+        comic.description = ""
+        comic.date = ""
+        
+        return comic
+        
     }
     
     // *****************
