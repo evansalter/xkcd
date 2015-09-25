@@ -50,6 +50,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         
         // Initialize progress bar
+        progressView.hidden = true
         progressView.setProgress(0.0, animated: false)
         
         // Show loading indicator
@@ -463,6 +464,8 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
         let continueAction = UIAlertAction(title: "Continue", style: .Default) { (_) in
             let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+            self.progressView.hidden = false
+            self.title = "Downloading all comics..."
             dispatch_async(dispatch_get_global_queue(priority, 0)){
                 self.downloadAllComics()
             }
@@ -488,7 +491,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             
             for var i = currentComic; i > 0; i-- {
                 if i == 1 {
-                    self.progressView.setProgress(0.0, animated: true)
+                    self.progressView.setProgress(0.0, animated: false)
                 }
                 else{
                     let progress: Float = (Float(lowestComicNumber!) - Float(i)) / Float(lowestComicNumber!)
@@ -525,7 +528,10 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
                 })
 
             }
-            
+            dispatch_async(dispatch_get_main_queue(), {
+                self.progressView.hidden = true
+                self.title = "xkcd"
+            })
         }
     }
     
