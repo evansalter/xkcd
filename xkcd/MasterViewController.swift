@@ -465,7 +465,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         let continueAction = UIAlertAction(title: "Continue", style: .Default) { (_) in
             let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
             self.progressView.hidden = false
-            self.title = "Downloading all comics..."
+            self.title = "Downloading " + (Int((self.objects[self.objects.count-1] as! Comic).number)!-1).description +  " comics..."
             dispatch_async(dispatch_get_global_queue(priority, 0)){
                 self.downloadAllComics()
             }
@@ -479,6 +479,10 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     }
     
     func downloadAllComics() {
+        
+        let refreshControlRef = self.refreshControl
+        self.refreshControl = nil
+        self.tableView.bounces = false
         
         let lowestComicNumber = Int((objects[objects.count-1] as! Comic).number);
         let currentComic = lowestComicNumber! - 1
@@ -531,8 +535,14 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             dispatch_async(dispatch_get_main_queue(), {
                 self.progressView.hidden = true
                 self.title = "xkcd"
+                self.refreshControl = refreshControlRef
+                self.tableView.bounces = true
             })
         }
+        
+        dispatch_async(dispatch_get_main_queue(), {
+            self.refreshControl?.enabled = true
+        })
     }
     
     // *****************
