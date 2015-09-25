@@ -22,6 +22,7 @@
 		7D57E2B01BAB3CC6001BD66C /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7D57E2AE1BAB3CC6001BD66C /* LaunchScreen.xib */; };
 		7D57E2BC1BAB3CC6001BD66C /* xkcdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D57E2BB1BAB3CC6001BD66C /* xkcdTests.swift */; };
 		7D57E2CA1BAB5C82001BD66C /* Comic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D57E2C91BAB5C82001BD66C /* Comic.swift */; };
+		7D8D19931BB5C1EB002D07F7 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D8D19921BB5C1EB002D07F7 /* Reachability.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		7D57E2BB1BAB3CC6001BD66C /* xkcdTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = xkcdTests.swift; sourceTree = "<group>"; };
 		7D57E2C91BAB5C82001BD66C /* Comic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comic.swift; sourceTree = "<group>"; };
 		7D57E2CB1BAB9888001BD66C /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		7D8D19921BB5C1EB002D07F7 /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +103,7 @@
 				7D57E2C91BAB5C82001BD66C /* Comic.swift */,
 				7D57E2A31BAB3CC5001BD66C /* AppDelegate.swift */,
 				7D57E2A51BAB3CC5001BD66C /* MasterViewController.swift */,
+				7D8D19921BB5C1EB002D07F7 /* Reachability.swift */,
 				7D57E2A71BAB3CC5001BD66C /* DetailViewController.swift */,
 				7D57E2A91BAB3CC6001BD66C /* Main.storyboard */,
 				7D57E2AC1BAB3CC6001BD66C /* Images.xcassets */,
@@ -261,6 +264,7 @@
 				7D57E2A81BAB3CC5001BD66C /* DetailViewController.swift in Sources */,
 				7D57E2CA1BAB5C82001BD66C /* Comic.swift in Sources */,
 				7D57E2A61BAB3CC5001BD66C /* MasterViewController.swift in Sources */,
+				7D8D19931BB5C1EB002D07F7 /* Reachability.swift in Sources */,
 				7D57E2A41BAB3CC5001BD66C /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

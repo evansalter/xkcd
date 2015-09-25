@@ -31,25 +31,33 @@ class DetailViewController: UIViewController {
         let imageRequest: NSURLRequest = NSURLRequest(URL: url!)
         let queue: NSOperationQueue = NSOperationQueue.mainQueue()
         
-        // perform an asynchronous request for the image
-        NSURLConnection.sendAsynchronousRequest(imageRequest, queue: queue, completionHandler: {response, imgData, error in
-            
-            if error == nil {
-                // once the image has loaded, hide the loading message
-                self.loadingLabel?.hidden = true
-                // present the image in the image view
-                let image = UIImage(data: imgData!)
-                self.imgView?.image = image
-            }
-            
-            }
-        )
+        let reachability = Reachability.reachabilityForInternetConnection()
+        if reachability?.isReachable() == true {
         
-        // scale the image up/down to fill as much of the screen as possible, without overlapping, while mainting the aspect ratio
-        imgView?.contentMode = UIViewContentMode.ScaleAspectFit
-        
-        // set the title of the view to the comic number
-        self.title = detailItem?.number
+            // perform an asynchronous request for the image
+            NSURLConnection.sendAsynchronousRequest(imageRequest, queue: queue, completionHandler: {response, imgData, error in
+                
+                if error == nil {
+                    // once the image has loaded, hide the loading message
+                    self.loadingLabel?.hidden = true
+                    // present the image in the image view
+                    let image = UIImage(data: imgData!)
+                    self.imgView?.image = image
+                }
+                
+                }
+            )
+            
+            // scale the image up/down to fill as much of the screen as possible, without overlapping, while mainting the aspect ratio
+            imgView?.contentMode = UIViewContentMode.ScaleAspectFit
+            
+            // set the title of the view to the comic number
+            self.title = detailItem?.number
+            
+        }
+        else {
+            self.loadingLabel?.text = "No network connection..."
+        }
         
     }
 

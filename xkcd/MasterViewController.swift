@@ -13,8 +13,6 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     
     // TODO: Check for network connectivity before attempting to download data
     
-    
-    
     // **************************
     // MARK: - Instance Variables
     // **************************
@@ -54,7 +52,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
         progressView.setProgress(0.0, animated: false)
         
         // Show loading indicator
-        startLoading()
+        //startLoading()
         
         // Load the comics from 
         self.loadComics()
@@ -236,6 +234,17 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     // MARK: - Downloading Comics
     // **************************
     
+    func noNetworkErrorDialog() {
+        
+        let alertView = UIAlertController(title: "No Network Connection", message: "You are not connected to the internet.  Please connect to the internet and try again.", preferredStyle: .Alert)
+        let OKAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+        
+        alertView.addAction(OKAction)
+        
+        self.presentViewController(alertView, animated: true, completion: nil)
+        
+    }
+    
     /// Downloads the RSS feed from xkcd.com and calls the XML parser to parse it, resulting in the 4 most recent comics.
     ///
     /// After parsing, the function checks which comics, if any, are new, and places them in the correct spot in the objects array.
@@ -244,6 +253,14 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     /// 
     /// For example, if objects=[1234, 1233, 1232, ...] and `getRSS()` returns [1240, 1239, 1238, 1237], then 1236 and 1235 will also be loaded
     func getRSS() {
+        
+        let reachability = Reachability.reachabilityForInternetConnection()
+        if reachability?.isReachable() == false {
+            noNetworkErrorDialog()
+            return
+        }
+        
+        self.startLoading()
         
         let urlString = NSURL(string: "http://xkcd.com/rss.xml")
         let rssUrlRequest:NSURLRequest = NSURLRequest(URL: urlString!)
@@ -363,6 +380,12 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     /// Loads 10 more comics at the end of the list
     func loadMoreComics() {
         
+        let reachability = Reachability.reachabilityForInternetConnection()
+        if reachability?.isReachable() == false {
+            self.noNetworkErrorDialog()
+            return
+        }
+        
         // display the loading indicator
         self.startLoading()
         
@@ -418,7 +441,13 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     
     @IBAction func downloadAllButtonPressed(sender: AnyObject) {
         
-       // confirmation alert
+        let reachability = Reachability.reachabilityForInternetConnection()
+        if reachability?.isReachable() == false {
+            self.noNetworkErrorDialog()
+            return
+        }
+        
+        // confirmation alert
         let alertView = UIAlertController(title: "Download All Comics", message: "This action will download all comics.  Would you like to continue?", preferredStyle: .Alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
         let continueAction = UIAlertAction(title: "Continue", style: .Default) { (_) in
@@ -438,6 +467,12 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     }
     
     func downloadAllComics() {
+        
+        let reachability = Reachability.reachabilityForInternetConnection()
+        if reachability?.isReachable() == false {
+            self.noNetworkErrorDialog()
+            return
+        }
         
         let refreshControlRef = self.refreshControl
         self.refreshControl = nil
@@ -515,8 +550,6 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
     // *****************
     // MARK: - XMLParser
     // *****************
-    
-    // TODO: This should be in its own class
     
     var entryTitle: String!
     var entryLink: String!
@@ -692,4 +725,3 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
 
 
 }
-
