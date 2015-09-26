@@ -386,6 +386,11 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             return
         }
         
+        if Int((self.objects[self.objects.count-1] as! Comic).number) == 1 {
+            self.noMoreComicsError()
+            return
+        }
+        
         // display the loading indicator
         self.startLoading()
         
@@ -399,7 +404,7 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             var nums = [String]()
             
             // find the next 10 comic numbers and add them to the nums array
-            for var i = lowestNumberInt! - 1; i >= lowestNumberInt! - 10; i-- {
+            for var i = lowestNumberInt! - 1; i >= lowestNumberInt! - 10 && i > 0; i-- {
                 nums.append(i.description)
             }
             
@@ -425,6 +430,16 @@ class MasterViewController: UITableViewController, NSXMLParserDelegate {
             self.saveComics()
         
         }
+        
+    }
+    
+    func noMoreComicsError() {
+        
+        let alertView = UIAlertController(title: "No more comics", message: "Error: There are no more comics to download.", preferredStyle: .Alert)
+        let OKAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+        alertView.addAction(OKAction)
+        
+        self.presentViewController(alertView, animated: true, completion: nil)
         
     }
     
