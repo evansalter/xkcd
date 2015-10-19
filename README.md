@@ -8,7 +8,7 @@ I couldn't find an xkcd reader on the App Store that I liked, so I decided to ma
 
 ## License
 
-The MIT License
+[The MIT License](LICENSE.md)
 
 ## Screenshots
 
