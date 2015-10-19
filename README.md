@@ -8,9 +8,9 @@ I couldn't find an xkcd reader on the App Store that I liked, so I decided to ma
 
 ## To do
 
-- [x] Add sharing for comics
-- [] Implement text search for comics  
-- [] Release for beta testing
+- [x] Add comic sharing
+- [ ] Implement text search for comics  
+- [ ] Release for beta testing
 
 ## License
 
