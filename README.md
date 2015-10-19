@@ -6,6 +6,12 @@ A simple iOS app for viewing the latest XKCD comics.  Currently a work in progre
 
 I couldn't find an xkcd reader on the App Store that I liked, so I decided to make one.  In keeping with the open nature of Randall's comic, I decided to make it open source and free with no advertising.  The project is currently a WIP, but once it is completed, I will publish it on the app store.  Feel free to take any of my code/fork the project.  If you have any requests, let me know.  I may be able to do it for you.  Any suggestions and comments are appreciated!
 
+## To do
+
+[x] Add sharing for comics
+[] Implement text search for comics  
+[] Release for beta testing
+
 ## License
 
 [The MIT License](LICENSE.md)
